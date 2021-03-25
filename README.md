@@ -28,7 +28,7 @@ DOGEHOUSE_TOKEN = "DOGEHOUSE TOKEN HERE"
 
 DOGEHOUSE_REFRESH_TOKEN = "DOGEHOUSE REFRESH TOKEN HERE"
 ```
-(if you're on mobile, just ask your friend to do it, there is no other way right now)
+(if you're on mobile, just ask your friend to get the tokens for you, there is no other way right now)
 
 How to get all the modules in requirements.txt?
 
