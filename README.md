@@ -24,8 +24,9 @@ How to get your account token and account refresh token?
 4. Copy your token and refresh-token and put them in an .env file:
 
 ```
-DOGEHOUSE_TOKEN = "TOKEN"
-DOGEHOUSE_REFRESH_TOKEN = "REFRESH TOKEN"
+DOGEHOUSE_TOKEN = "DOGEHOUSE TOKEN HERE"
+
+DOGEHOUSE_REFRESH_TOKEN = "DOGEHOUSE REFRESH TOKEN HERE"
 ```
 (if you're on mobile, just ask your friend to do it, there is no other way right now)
 
