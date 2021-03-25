@@ -19,9 +19,10 @@ How to get your account token and account refresh token?
 
 
 1. Go to [DogeHouse](https://dogehouse.tv)
-2. Open Developer options (F12 or Ctrl+Shift+I)
-3. Go to Application > Local Storage > dogehouse.tv
-4. Copy your token and refresh-token and put them in an .env file:
+2. Login to the "bot" account
+3. Open Developer options (F12 or Ctrl+Shift+I)
+4. Go to Application > Local Storage > dogehouse.tv
+5. Copy your token and refresh-token and put them in an .env file:
 
 ```
 DOGEHOUSE_TOKEN = "DOGEHOUSE TOKEN HERE"
