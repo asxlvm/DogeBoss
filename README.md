@@ -3,6 +3,11 @@ DogeBoss
 
 This repository contains the source of an Open-Source [DogeHouse](https://www.dogehouse.tv) bot programmed in Python, use the code however you want.
 
+IMPORTANT!
+--------
+
+Do not learn from my code, I'm a dumbass and my techniques are really bad!
+
 What you need:
 --------
 
