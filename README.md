@@ -50,7 +50,7 @@ How to run
   - Run the bot with `python main.py`
   - If no errors show up, you're good to go!
 
-2. Run on [replit](https://www.replit.com)
+2. Run on [replit](https://www.replit.com) [![Run on Repl.it](https://repl.it/badge/github/asxlvm/DogeBoss)](https://repl.it/github/asxlvm/DogeBoss)
 - After doing everything in `What you need:` do this:
   - Press the "Run" button as replit will start the file with that
   - If no errors show up, you're good to go!
