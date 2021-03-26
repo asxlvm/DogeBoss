@@ -136,6 +136,12 @@ Awesome people            |  Why they deserve credit
 [BenBot](https://github.com/dragonismcode/benbot)  | As I grabbed a little piece of code from them and "Pythoned" it :D
 [OEIS](https://github.com/sidneycadot/oeis/blob/master/README.md)  | I took their README.md and just modified it ;)
 
+TODO:
+--------------
+
+1. d!joke & d!dadjoke (will be done today)
+2. d!tictactoe (i have that done but i need to wait till \n new lines work)
+3. Economy (will be "done" this week maybe)
 
 Thanks to everyone!
 
