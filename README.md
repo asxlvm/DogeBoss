@@ -56,7 +56,7 @@ How to run
   - If no errors show up, you're good to go!
   
   - If you want 24/7 hosting of the bot on replit add this to the code:
-  ```
+  ```py
   from keep_alive import keep_alive
   
   # your code etc.
@@ -64,7 +64,7 @@ How to run
   keep_alive()
   ```
   - You also have to add a `keep_alive.py` file in the same directory as `main.py` with this code:
-  ```
+  ```py
   from flask import Flask
   from threading import Thread
 
