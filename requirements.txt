@@ -10,3 +10,4 @@ time
 asyncio
 re
 json
+beautifulsoup4

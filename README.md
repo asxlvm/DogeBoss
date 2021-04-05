@@ -1,7 +1,7 @@
-![](https://img.shields.io/badge/PYTHON-3.5--3.8-green?style=for-the-badge) ![GitHub stars](https://img.shields.io/github/stars/asxlvm/DogeBoss?style=for-the-badge)
+# DogeBoss
 
-DogeBoss
-==========
+![](https://img.shields.io/badge/PYTHON-3.5--3.8-green) ![GitHub stars](https://img.shields.io/github/stars/asxlvm/DogeBoss)
+[![Run on Repl.it](https://repl.it/badge/github/asxlvm/DogeBoss)](https://repl.it/github/asxlvm/DogeBoss)
 
 This repository contains the source of an Open-Source [DogeHouse](https://www.dogehouse.tv) bot programmed in Python, use the code however you want.
 
