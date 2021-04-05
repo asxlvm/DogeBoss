@@ -157,20 +157,21 @@ class Client(DogeClient):
 
     @command
     async def insult(self, ctx: Message, *, user2: User):
-        # BlazeBot insult command, updated (insults from SmileDetection, some removed)
-        insults = ["If laughter is the best medicine, your face must be curing the world.", "It's better to let someone think you are an idiot than to open your mouth and prove it.", "If I had a face like yours, I'd sue my parents.", "You're so ugly, when your mom dropped you off at school she got a fine for littering.", "Brains aren't everything. In your case they're nothing.", "Are you always this stupid or is today a special occasion?", "Don't you have a terribly empty feeling - in your skull?", "How did you get here? Did someone leave your cage open?", "I'd like to see things from your point of view but I can't seem to get my head that far up my ass.", "The last time I saw something like you, I flushed it.", "If ugliness was measured in bricks, you would be the Great Wall of China.", "You want an insult? Look in the mirror!", "Did a thought cross your mind? It must have been a long and lonely journey...", "You'd better hide; the garbage man is coming.", "I don't engage in mental combat with the unarmed.", "Is your ass jealous of the amount of shit that comes out of your mouth?", "Your face looks like it caught fire and someone tried to put it out with a fork.", "I thought a little girl from Kansas dropped a house on you…", "I'm jealous of people that don't know you.", "You bring everyone a lot of joy, when you leave the room.", "If you are going to be two-faced, at least make one of them pretty.", "If you're going to be a smartarse, first you have to be smart. Otherwise you're just an arse.", "Somewhere out there is a tree, tirelessly producing oxygen so you can breathe. I think you owe it an apology.", "I don't exactly hate you, but if you were on fire and I had water, I'd drink it.", "If you were on TV, I would change the channel.", "You have Diarrhea of the mouth; constipation of the ideas.", "If ugly were a crime, you'd get a life sentence.", "There is no vaccine for stupidity.", "Did your parents ever ask you to run away from home?", "Any similarity between you and a human is purely coincidental.", "Keep talking – someday you’ll say something intelligent.", "Don’t you love nature, despite what it did to you?", "Has your existence been verified by science yet?", "I don't understand how they could cram so much ugly into one physical form."]
-        await self.send(f"{user2}, {random.choice(insults)}")
+        resp = requests.get("https://insult.mattbas.org/api/insult.html")
+        html = resp.content
+        soup = BeautifulSoup(html, "html.parser")
+        await self.send(f"{user2}, {soup.h2.string.strip()}.")
+
+    @command
+    async def compliment(self, ctx: Message, *, user2: User):
+        resp = requests.get("http://www.madsci.org/cgi-bin/lynn/jardin/SCG")
+        html = resp.content
+        soup = BeautifulSoup(html, "html.parser")
+        await self.send(f"{user2}, {soup.h2.string.strip()}")
 
     @command
     async def choose(self, ctx: Message, *, message):
         await self.send(random.choice(message.split(",")))
-
-    @command
-    async def compliment(self, ctx: Message, *, message):
-        resp = requests.get("http://www.madsci.org/cgi-bin/lynn/jardin/SCG")
-        html = resp.content
-        soup = BeautifulSoup(html, "html.parser")
-        await self.send(soup.h2.string.strip())
 
     # End of new commands
 
