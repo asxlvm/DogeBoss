@@ -139,11 +139,11 @@ Awesome people            |  Why they deserve credit
 TODO:
 --------------
 
-1. d!joke & d!dadjoke (will be done today)
-2. d!tictactoe (i have that done but i need to wait till \n new lines work)
+1. d!joke & d!dadjoke
+2. d!tictactoe (i have that done but I need to wait till \n new lines work)
 3. Economy (will be "done" this week maybe)
 4. Complex `d!fight` command with `wait_for` events etc.
-5. Adding `Nome` values to commands so they're used easily and can return errors etc.
+5. Adding `None` values to commands so they're used easily and can return errors etc.
 
 Thanks to everyone!
 
