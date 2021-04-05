@@ -157,10 +157,9 @@ class Client(DogeClient):
 
     @command
     async def insult(self, ctx: Message, *, user2: User):
-        resp = requests.get("https://insult.mattbas.org/api/insult.html")
-        html = resp.content
-        soup = BeautifulSoup(html, "html.parser")
-        await self.send(f"{user2}, {soup.h2.string.strip()}.")
+        resp = requests.get("https://insult.mattbas.org/api/insult")
+        html = resp.content.decode("utf-8")
+        await self.send(f"{user2}, {resp.content}.")
 
     @command
     async def compliment(self, ctx: Message, *, user2: User):
