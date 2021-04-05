@@ -57,35 +57,9 @@ How to run
   - Press the "Run" button as replit will start the file with that
   - If no errors show up, you're good to go!
   
-  - If you want 24/7 hosting of the bot on replit add this to the code:
-  ```py
-  from keep_alive import keep_alive
+  - If you want 24/7 hosting of the bot on repl.it, change the variable `run_on_repl` to `True` in `main.py`.
   
-  # your code etc.
-  
-  keep_alive()
-  ```
-  - You also have to add a `keep_alive.py` file in the same directory as `main.py` with this code:
-  ```py
-  from flask import Flask
-  from threading import Thread
-
-  app = Flask('')
-
-  @app.route('/')
-  def home():
-      return "Hello. I am alive!"
-
-  def run():
-      app.run(host='0.0.0.0',port=8080)
-      print("Flask server running")
-
-  def keep_alive():
-      t = Thread(target=run)
-      t.start()
-      print("Keep Alive file initiated")
-  ```
-  - After adding all of this code, go to [Uptime Robot](https://uptimerobot.com), register an account if you don't have one already and then do the following:
+  - To monitor your bot's uptime, go to [Uptime Robot](https://uptimerobot.com), register an account if you don't have one already and then do the following:
     - Create a new monitor with these parameters:
       - Monitor Type: HTTP(s)
       - Friendly Name: `Of your own choice, doesn't matter`
@@ -134,7 +108,6 @@ Awesome people            |  Why they deserve credit
 [DogeHouse](https://dogehouse.tv)   |  The DogeHouse dev community for being really helpful, kind and supportive <3
 [dogehouse.py](https://github.com/Arthurdw/dogehouse.py)  | Arthur for making this great API wrapper, I couldn't make this bot without it obviously!
 [BenBot](https://github.com/dragonismcode/benbot)  | As I grabbed a little piece of code from them and "Pythoned" it :D
-[OEIS](https://github.com/sidneycadot/oeis/blob/master/README.md)  | I took their README.md and just modified it ;)
 
 TODO:
 --------------
