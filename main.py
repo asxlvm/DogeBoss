@@ -181,6 +181,11 @@ class Client(DogeClient):
     async def roll(self, ctx: Message, *, sides: int):
         await self.send("You rolled ... " + str(random.randint(1, sides)))
 
+    @command
+    async def gh(self, ctx: Message, *, query: str):
+        repo = requests.get("https://api.github.com/search/repositories?q=" + query).json()
+        await self.send("Best match: " + repo["items"][0]["html_url"])
+
     # End of new commands
 
     @command
