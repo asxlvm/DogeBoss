@@ -149,6 +149,11 @@ class Client(DogeClient):
         await self.send(cat["url"])
 
     @command
+    async def shibe(self, ctx: Message):
+        image_url = requests.get("https://shibe.online/api/shibes?count=1").json()[0]
+        await self.send(image_url)
+
+    @command
     async def fortune(self, ctx: Message):
         fortune = requests.get("http://yerkee.com/api/fortune").json()["fortune"]
         line = fortune.replace('\n','')
@@ -171,6 +176,10 @@ class Client(DogeClient):
     @command
     async def choose(self, ctx: Message, *, message):
         await self.send(random.choice(message.split(",")))
+
+    @command
+    async def roll(self, ctx: Message, *, sides: int):
+        await self.send("You rolled ... " + str(random.randint(1, sides)))
 
     # End of new commands
 
