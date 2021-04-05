@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import json
+import locale
 import os
 import random
 import re
@@ -25,19 +26,20 @@ DOGETOKEN = os.getenv('DOGEHOUSE_TOKEN')
 DOGEREFRESHTOKEN = os.getenv('DOGEHOUSE_REFRESH_TOKEN')
 
 launch_time = datetime.utcnow()
+locale.setlocale( locale.LC_ALL, '' )
 
 class Client(DogeClient):
     @event
     async def on_ready(self):
         print(f"Successfully connected as {self.user}!")
         await self.create_room("DogeBoss!")
-        await self.send(f"Hey! My name is DogeBoss! I'm a multi-purpose chatbot, to see my features, type:ㅤㅤ d!help")
+        await self.send(f"Hey! My name is DogeBoss! I'm a multi-purpose chatbot, to see my features, type:ㅤㅤ {self.prefix}help")
 
     # Events, Starboard right here;
 
     @event
     async def on_message(self, message: Message):
-        if message.content.startswith("d!"):
+        if message.content.startswith(self.prefix):
             pass
         elif message.content.startswith("!"):
             pass
@@ -85,30 +87,32 @@ class Client(DogeClient):
             final.append(a)
 
 
-        # Checks if at least 2 are the same
         final_set = set(final)
-        contains_duplicates = len(final) != len(final_set)
 
         # Checks if they are all the same
         if len(final_set) == 1:
             return await self.send(f"{ctx.author.mention} Triple! You won!ㅤ •ㅤ {' | '.join(final)}")
-
-        elif contains_duplicates:
+        # Checks if at least 2 are the same
+        elif len(final) != len(final_set):
             return await self.send(f"{ctx.author.mention} You won!ㅤ •ㅤ {' | '.join(final)}")
         else:
             return await self.send(f"{ctx.author.mention} You lost!ㅤ •ㅤ {' | '.join(final)}")
 
     @command
     async def crypto(self, ctx: Message, crypc: str):
-        reqs = requests.get(
-            f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&ids={crypc}").json()
-        if reqs == []:
-            return await self.send(f"I couldn't find any results for the cryptocurrency: {crypc} • Example: d!crypto bitcoin")
-        rejson = reqs[0]
+        
+        # Get the current currency symbol name to get the right price for that currency
+        curr_symbol = locale.localeconv()['int_curr_symbol'].lower()
+
+        req = requests.get(
+            f"https://api.coingecko.com/api/v3/coins/markets?vs_currency={curr_symbol}&ids={crypc}").json()
+        if req == []:
+            return await self.send(f"I couldn't find any results for the cryptocurrency: {crypc} • Example: {self.prefix}crypto bitcoin")
+        rejson = req[0]
 
         name = rejson["name"]
         symbol = rejson["symbol"].upper()
-        price = rejson["current_price"]
+        price = locale.currency(rejson["current_price"]) # Format as currency
         ranked = rejson["market_cap_rank"]
         twenty_high = rejson["high_24h"]
         twenty_low = rejson["low_24h"]
@@ -135,18 +139,18 @@ class Client(DogeClient):
         else:
             rankedsym = "th"
 
-        await self.send(f"Crypto data for: {name} ({symbol}) • Current Price: {price}€ • Ranked: {ranked}{rankedsym} • Last 24h stats: Highest: {twenty_high}€, Lowest: {twenty_low}€, Change: {twenty_change}, Change in %: {twenty_perc}% • All Time High (ATH): {ath}€, ATH Change in %: {ath_change_perc}%, ATH at: {ath_date} • All Time Low (ATL): {atl}€, ATL Change in %: {atl_change_perc}%, ATL at: {atl_date} • Last update at {lupdt}")
+        await self.send(f"Crypto data for: {name} ({symbol}) • Current Price: {price} • Ranked: {ranked}{rankedsym} • Last 24h stats: Highest: {twenty_high}, Lowest: {twenty_low}, Change: {twenty_change}, Change in %: {twenty_perc}% • All Time High (ATH): {ath}, ATH Change in %: {ath_change_perc}%, ATH at: {ath_date} • All Time Low (ATL): {atl}, ATL Change in %: {atl_change_perc}%, ATL at: {atl_date} • Last update at {lupdt}")
 
     # RonaRage/iCrazyBlaze
     @command
     async def dog(self, ctx: Message):
-        dog = requests.get("https://api.thedogapi.com/v1/images/search", headers={"x-api-key": "d0558cf8-f941-42f7-8daa-6741a67c5a2e"}).json()[0]
-        await self.send(dog["url"])
+        image_url = requests.get("https://api.thedogapi.com/v1/images/search", headers={"x-api-key": "d0558cf8-f941-42f7-8daa-6741a67c5a2e"}).json()[0]["url"]
+        await self.send(image_url)
 
     @command
     async def cat(self, ctx: Message):
-        cat = requests.get("https://api.thecatapi.com/v1/images/search", headers={"x-api-key": "37b77c23-9000-46c8-b808-a224a26f2d2a"}).json()[0]
-        await self.send(cat["url"])
+        image_url = requests.get("https://api.thecatapi.com/v1/images/search", headers={"x-api-key": "37b77c23-9000-46c8-b808-a224a26f2d2a"}).json()[0]["url"]
+        await self.send(image_url)
 
     @command
     async def shibe(self, ctx: Message):
@@ -162,14 +166,14 @@ class Client(DogeClient):
 
     @command
     async def insult(self, ctx: Message, *, user2: User):
-        resp = requests.get("https://insult.mattbas.org/api/insult")
-        html = resp.content.decode("utf-8")
-        await self.send(f"{user2}, {resp.content}.")
+        req = requests.get("https://insult.mattbas.org/api/insult")
+        html = req.content.decode("utf-8")
+        await self.send(f"{user2}, {req.content}.")
 
     @command
     async def compliment(self, ctx: Message, *, user2: User):
-        resp = requests.get("http://www.madsci.org/cgi-bin/lynn/jardin/SCG")
-        html = resp.content
+        req = requests.get("http://www.madsci.org/cgi-bin/lynn/jardin/SCG")
+        html = req.content
         soup = BeautifulSoup(html, "html.parser")
         await self.send(f"{user2}, {soup.h2.string.strip()}")
 
@@ -243,7 +247,7 @@ class Client(DogeClient):
     @event
     async def on_user_join(self, user: User):
         joined = [user.id]
-        await self.send(message=f"Welcome {user.mention}\u200B! I am DogeBoss, a chatbot for DogeHouse, to see my commands type: d!help", whisper=joined)
+        await self.send(message=f"Welcome {user.mention}\u200B! I am DogeBoss, a chatbot for DogeHouse, to see my commands type: {self.prefix}help", whisper=joined)
 
     @command
     async def uptime(self, ctx: Message):
@@ -317,9 +321,9 @@ class Client(DogeClient):
     async def help(self, ctx: Message):
         # whispers the help command to the user that executed it
         user = [ctx.author.id]
-        await self.send(message="Hey, these are my commands right now! • d!echo <message>  -  Repeats what you said • d!pp <user>  -  Sends the tagged user's pp :gachiHYPER: • d!covid <country>  - Sends COVID stats for the specified country :coronaS: • d!define <term>  - Searches for the specified term on Urban Dictionary • d!funfact  - Returns a random fun fact • d!crypto <currency>  - Returns stats for the specified crypto :CryptoDOGE: • d!math <example>  -  Returns the results for a mathematical example :5Head: • d!slots  -  Slots command, economy will be implemented", whisper=user)
+        await self.send(message=f"Hey, these are my commands right now! • {self.prefix}echo <message>  -  Repeats what you said • {self.prefix}pp <user>  -  Sends the tagged user's pp :gachiHYPER: • {self.prefix}covid <country>  - Sends COVID stats for the specified country :coronaS: • {self.prefix}define <term>  - Searches for the specified term on Urban Dictionary • {self.prefix}funfact  - Returns a random fun fact • {self.prefix}crypto <currency>  - Returns stats for the specified crypto :CryptoDOGE: • {self.prefix}math <example>  -  Returns the results for a mathematical example :5Head: • {self.prefix}slots  -  Slots command, economy will be implemented", whisper=user)
         await asyncio.sleep(1.5)
-        await self.send(message="d!fight <user>  -  You fight the user you mentioned :hyperHammer: • d!uptime  -  Shows for how long the bot has been online • d!setstar & d!starred  -  d!setstar Sets a message to be starred, a starred message can be accessed by typing d!starred unless it's overwritten by another starred message", whisper=user)
+        await self.send(message=f"{self.prefix}fight <user>  -  You fight the user you mentioned :hyperHammer: • {self.prefix}uptime  -  Shows for how long the bot has been online • {self.prefix}setstar & {self.prefix}starred  -  {self.prefix}setstar Sets a message to be starred, a starred message can be accessed by typing {self.prefix}starred unless it's overwritten by another starred message", whisper=user)
 
 
 if __name__ == "__main__":
