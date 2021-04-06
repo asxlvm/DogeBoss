@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import inspect
 import json
 import locale
 import os
@@ -55,6 +56,7 @@ class Client(DogeClient):
 
     @command
     async def setstar(self, ctx: Message):
+        """Sets a message to be 'starred'. The current starred message can be accessed using the 'starred' command."""
         global msg
         global msgauthor
         global starred  # also making those global so we can use them across the whole file
@@ -65,20 +67,24 @@ class Client(DogeClient):
 
     @command
     async def starred(self, ctx: Message):
+        """Reads the current starred message"""
         global starred
         global starredauthor
         await self.send(f"Starred Message: {starred}ㅤ|ㅤMessage Creator: @{starredauthor}")
 
     @command
     async def whoami(self, ctx: Message):
-        await self.send(f"Username: {ctx.author.mention}  •  Display Name: {ctx.author.displayname}  •  ID: {ctx.author.id}")
+        """Gets info about yourself"""
+        await self.userinfo(self, ctx)
 
     @command
     async def whereami(self, ctx: Message):
+        """Gets info about the room you're in"""
         await self.send(f"Name: {self.room.name} • Description: {self.room.description} • ID: {self.room.id} • Member Count: {self.room.count} • Created at: {self.room.created_at} • Is Private?: {self.room.is_private}")
 
     @command
     async def slots(self, ctx: Message):
+        """Plays a slot machine"""
 
         final = []
         for i in range(5):
@@ -99,15 +105,16 @@ class Client(DogeClient):
             return await self.send(f"{ctx.author.mention} You lost!ㅤ •ㅤ {' | '.join(final)}")
 
     @command
-    async def crypto(self, ctx: Message, crypc: str):
+    async def crypto(self, ctx: Message, currency: str):
+        """Returns stats for the specified cryptocurrency :CryptoDOGE:"""
         
         # Get the current currency symbol name to get the right price for that currency
         curr_symbol = locale.localeconv()['int_curr_symbol'].lower()
 
         req = requests.get(
-            f"https://api.coingecko.com/api/v3/coins/markets?vs_currency={curr_symbol}&ids={crypc}").json()
+            f"https://api.coingecko.com/api/v3/coins/markets?vs_currency={curr_symbol}&ids={currency}").json()
         if req == []:
-            return await self.send(f"I couldn't find any results for the cryptocurrency: {crypc} • Example: {self.prefix}crypto bitcoin")
+            return await self.send(f"I couldn't find any results for the cryptocurrency: {currency} • Example: {self.prefix}crypto bitcoin")
         rejson = req[0]
 
         name = rejson["name"]
@@ -144,49 +151,57 @@ class Client(DogeClient):
     # RonaRage/iCrazyBlaze
     @command
     async def dog(self, ctx: Message):
+        """Returns a random image of a dog"""
         image_url = requests.get("https://api.thedogapi.com/v1/images/search", headers={"x-api-key": "d0558cf8-f941-42f7-8daa-6741a67c5a2e"}).json()[0]["url"]
         await self.send(image_url)
 
     @command
     async def cat(self, ctx: Message):
+        """Returns a random image of a cat"""
         image_url = requests.get("https://api.thecatapi.com/v1/images/search", headers={"x-api-key": "37b77c23-9000-46c8-b808-a224a26f2d2a"}).json()[0]["url"]
         await self.send(image_url)
 
     @command
     async def shibe(self, ctx: Message):
+        """Returns a random image of a Shibe"""
         image_url = requests.get("https://shibe.online/api/shibes?count=1").json()[0]
         await self.send(image_url)
 
     @command
     async def fortune(self, ctx: Message):
-        fortune = requests.get("http://yerkee.com/api/fortune").json()["fortune"]
-        line = fortune.replace('\n','')
-        line = line.replace('\t','')
+        """Returns a random fortune"""
+        req = requests.get("http://yerkee.com/api/fortune").json()["fortune"]
+        line = req.replace('\n','').replace('\t','')
         await self.send(line)
 
     @command
-    async def insult(self, ctx: Message, *, user2: User):
+    async def insult(self, ctx: Message, *, other_user: User = ctx.author):
+        """Insults the user you mentioned"""
         req = requests.get("https://insult.mattbas.org/api/insult")
         html = req.content.decode("utf-8")
-        await self.send(f"{user2}, {req.content}.")
+        await self.send(f"{other_user}, {req.content}.")
 
     @command
-    async def compliment(self, ctx: Message, *, user2: User):
+    async def compliment(self, ctx: Message, *, other_user: User = ctx.author):
+        """Compliments the user you mentioned"""
         req = requests.get("http://www.madsci.org/cgi-bin/lynn/jardin/SCG")
         html = req.content
         soup = BeautifulSoup(html, "html.parser")
-        await self.send(f"{user2}, {soup.h2.string.strip()}")
+        await self.send(f"{other_user}, {soup.h2.string.strip()}")
 
     @command
     async def choose(self, ctx: Message, *, message):
-        await self.send(random.choice(message.split(",")))
+        """Chooses a random option (separated by comma)"""
+        await self.send(random.choice(message.replace(", ", ",").split(",")))
 
     @command
     async def roll(self, ctx: Message, *, sides: int):
+        """Rolls a dice"""
         await self.send("You rolled ... " + str(random.randint(1, sides)))
 
     @command
     async def gh(self, ctx: Message, *, query: str):
+        """Searches for a GitHub repo"""
         repo = requests.get("https://api.github.com/search/repositories?q=" + query).json()
         await self.send("Best match: " + repo["items"][0]["html_url"])
 
@@ -194,11 +209,13 @@ class Client(DogeClient):
 
     @command
     async def funfact(self, ctx: Message):
+        """Returns a random fun fact"""
         res = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
         await self.send(res.json()["text"])
 
     @command
     async def define(self, ctx: Message, *, term: str):
+        """Searches for the specified term on Urban Dictionary"""
         api = "http://api.urbandictionary.com/v0/define"
         # Send request to the Urban Dictionary API and grab info
         response = requests.get(api, params=[("term", term)]).json()
@@ -228,6 +245,7 @@ class Client(DogeClient):
 
     @command
     async def covid(self, ctx: Message, *, country=None):
+        """Sends COVID stats for the specified country :coronaS:"""
         # TODO: if country == None then get global stats, need to wait for dogehouse.py to get that
         country = string.capwords(country)
         if "Of" in country:
@@ -251,6 +269,7 @@ class Client(DogeClient):
 
     @command
     async def uptime(self, ctx: Message):
+        """Shows for how long the bot has been online"""
         delta_uptime = datetime.utcnow() - launch_time
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
@@ -260,6 +279,7 @@ class Client(DogeClient):
 
     @command
     async def math(self, ctx: Message, *, expression: str):
+        """Returns the results for a mathematical example :5Head:"""
         # regex filter so we make sure that no character from the alphabet gets eval'd (thanks Erlend)
         filtering = re.search("[a-zA-Z]", expression)
         if filtering == None:  # filtering is None when the user passes the regex check
@@ -270,10 +290,12 @@ class Client(DogeClient):
 
     @command
     async def echo(self, ctx: Message, *, message):
+        """Repeats what you said"""
         await self.send(message)
 
     @command
     async def pp(self, ctx: Message, *, user: User):
+        """Shows the tagged user's PP :gachiHYPER:"""
 
         pp_length = random.randrange(-1, 16)
 
@@ -285,15 +307,17 @@ class Client(DogeClient):
         await self.send(f"{user}'s PP: ㅤㅤㅤ{pprnd}")
 
     @command
-    async def userinfo(self, ctx: Message, *, user: User):
-        await self.send(f"Info about: {user.displayname}ㅤㅤ|ㅤㅤID: {user.id}ㅤㅤ|ㅤㅤUsername: {user.username}")
+    async def userinfo(self, ctx: Message, user: User = ctx.author):
+        """Gets info about the user you mentioned, or you if no user is specified"""
+        await self.send(f"Username: {user.mention}  •  Display Name: {user.displayname}  •  ID: {user.id}")
 
     @command
-    async def fight(self, ctx: Message, *, user2: User):
+    async def fight(self, ctx: Message, *, other_user: User):
+        """Starts a fight the user you mentioned :hyperHammer:"""
 
         user1 = ctx.author.mention
 
-        if user1 == user2:
+        if user1 == other_user:
             await self.send("Damn, you wanna kill yourself? :Sadge: I won't stop you I guess...")
             await asyncio.sleep(2.5)
             suicresp = [f'{user1} has put a gun to his head and pulled the trigger :Sadge:',
@@ -304,9 +328,9 @@ class Client(DogeClient):
             await self.send(f'{suicresptext}')
             return
 
-        win = random.choice([user1, user2])
+        win = random.choice([user1, other_user])
         if win == user1:
-            lose = user2
+            lose = other_user
 
         else:
             lose = user1
@@ -317,13 +341,38 @@ class Client(DogeClient):
 
         await self.send(response)
 
+    def split_list(self, a_list):
+        half = len(a_list)//2
+        return a_list[:half], a_list[half:]
+
     @command
     async def help(self, ctx: Message):
-        # whispers the help command to the user that executed it
+        """Teaches you what different commands do"""
         user = [ctx.author.id]
-        await self.send(message=f"Hey, these are my commands right now! • {self.prefix}echo <message>  -  Repeats what you said • {self.prefix}pp <user>  -  Sends the tagged user's pp :gachiHYPER: • {self.prefix}covid <country>  - Sends COVID stats for the specified country :coronaS: • {self.prefix}define <term>  - Searches for the specified term on Urban Dictionary • {self.prefix}funfact  - Returns a random fun fact • {self.prefix}crypto <currency>  - Returns stats for the specified crypto :CryptoDOGE: • {self.prefix}math <example>  -  Returns the results for a mathematical example :5Head: • {self.prefix}slots  -  Slots command, economy will be implemented", whisper=user)
+        
+        helparray = []
+        this = self.__class__
+        for key in this.__dict__:
+            if hasattr(this.__dict__[key], '__call__'):
+                function = this.__dict__[key]
+
+                # Functions that are not commands should be excluded
+                if function.command == None:
+                    return
+
+                # Get argument names and surround them with <>
+                varnames = inspect.getfullargspec(function).args
+                varnames.remove("self")
+                varnames_formatted = ' '.join('<' + item + '>' for item in varnames)
+
+                helpstring = f"{self.prefix}{function.__name__} {varnames_formatted}  -  {function.__doc__}"
+                helparray.append(helpstring)
+
+        # Split the help page into 2 messages
+        help1, help2 = self.split_list(helparray)
+        await self.send("Hey, these are my commands right now! • " + ' • '.join(help1), whisper=user)
         await asyncio.sleep(1.5)
-        await self.send(message=f"{self.prefix}fight <user>  -  You fight the user you mentioned :hyperHammer: • {self.prefix}uptime  -  Shows for how long the bot has been online • {self.prefix}setstar & {self.prefix}starred  -  {self.prefix}setstar Sets a message to be starred, a starred message can be accessed by typing {self.prefix}starred unless it's overwritten by another starred message", whisper=user)
+        await self.send(' • '.join(help2), whisper=user)
 
 
 if __name__ == "__main__":
