@@ -123,34 +123,34 @@ class Client(DogeClient):
         """Starts a battle with the user you mentioned :hyperHammer:"""
         currenthpauth = 100
         moves = 0
-         currenthpuser = 100
-          players = []
-           if players != [] or currenthpuser != 100 or currenthpauth != 100 or moves != 0:
-                return await self.send(f"{ctx.author.mention} a game is going on right now, you may not start another one.", whisper=[ctx.author.id])
-            if user == None:
-                return await self.send(message=f"{ctx.author.mention} Missing Required Argument - Usage: d!battle <user> • Example: d!fight @hudson", whisper=[ctx.author.id])
-            if user.id == ctx.author.id:
-                return await self.send(message=f"{ctx.author.mention} Bad Argument (You cannot battle yourself) - Usage: d!battle <user> • Example: d!fight @hudson", whisper=[ctx.author.id])
-            else:
-                try:
-                    users = await self.get_settings_data()
-                    fightDecline = users[str(user.id)]["autoRejectFights"]
-                    if fightDecline == True:
-                        await self.send(f"{ctx.author.mention} you can't fight that user as he has enabled autoRejectFights.", whisper=[ctx.author.id])
-                        return False
-                except Exception as e:
-                    return print(e)
-                await self.send(f"{user.mention} do you accept {ctx.author.mention} 's fight request? OPTIONS: Yes / No", whisper=[user.id])
-                adwaitfor = await self.wait_for('message', check=lambda message: message.author.id == user.id)
-                if adwaitfor.content.lower() == "yes":
-                    await asyncio.sleep(2)
-                    await self.send(f"{user.mention} has accepted the fight request, 3, 2, 1, FIGHT!", whisper=[ctx.author.id, user.id])
-                    await asyncio.sleep(2)
-                    True
-                elif adwaitfor.content.lower() == "no":
-                    await asyncio.sleep(2)
-                    await self.send(f"{user.mention} has declined the fight request.", whisper=[ctx.author.id])
+        currenthpuser = 100
+        players = []
+        if players != [] or currenthpuser != 100 or currenthpauth != 100 or moves != 0:
+            return await self.send(f"{ctx.author.mention} a game is going on right now, you may not start another one.", whisper=[ctx.author.id])
+        if user == None:
+            return await self.send(message=f"{ctx.author.mention} Missing Required Argument - Usage: d!battle <user> • Example: d!fight @hudson", whisper=[ctx.author.id])
+        if user.id == ctx.author.id:
+            return await self.send(message=f"{ctx.author.mention} Bad Argument (You cannot battle yourself) - Usage: d!battle <user> • Example: d!fight @hudson", whisper=[ctx.author.id])
+        else:
+            try:
+                users = await self.get_settings_data()
+                fightDecline = users[str(user.id)]["autoRejectFights"]
+                if fightDecline == True:
+                    await self.send(f"{ctx.author.mention} you can't fight that user as he has enabled autoRejectFights.", whisper=[ctx.author.id])
                     return False
+            except Exception as e:
+                return print(e)
+            await self.send(f"{user.mention} do you accept {ctx.author.mention} 's fight request? OPTIONS: Yes / No", whisper=[user.id])
+            adwaitfor = await self.wait_for('message', check=lambda message: message.author.id == user.id)
+            if adwaitfor.content.lower() == "yes":
+                await asyncio.sleep(2)
+                await self.send(f"{user.mention} has accepted the fight request, 3, 2, 1, FIGHT!", whisper=[ctx.author.id, user.id])
+                await asyncio.sleep(2)
+                True
+            elif adwaitfor.content.lower() == "no":
+                await asyncio.sleep(2)
+                await self.send(f"{user.mention} has declined the fight request.", whisper=[ctx.author.id])
+                return False
             print("true")
             m_author_id = ctx.author.id
             m_user_id = user.id
