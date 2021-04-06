@@ -1,29 +1,20 @@
-![](https://img.shields.io/badge/PYTHON-3.5--3.8-green?style=for-the-badge) ![GitHub stars](https://img.shields.io/github/stars/asxlvm/DogeBoss?style=for-the-badge)
+# DogeBoss
 
-DogeBoss
-==========
+![](https://img.shields.io/badge/Python-3.5--3.8-green)
+![GitHub stars](https://img.shields.io/github/stars/asxlvm/DogeBoss)
+[![Run on Repl.it](https://repl.it/badge/github/asxlvm/DogeBoss)](https://repl.it/github/asxlvm/DogeBoss)
 
 This repository contains the source of an Open-Source [DogeHouse](https://www.dogehouse.tv) bot programmed in Python, use the code however you want.
 
-IMPORTANT!
---------
-
-Do not learn from my code, I'm a dumbass and my techniques are really bad!
-
-What you need:
---------
+## What you need:
 
 To run the bot yourself, you will need these three things:
 
-1. Python 3+ (You won't need it downloaded on your device if you're using replit)
+1. Python 3.x (You won't need it downloaded on your device if you're using replit)
 2. Your account token and account refresh token
 3. All the modules in requirements.txt
 
-How to get Python 3+?
-Either download it from [the official Python website](https://www.python.org/downloads/release/python-392) or download it in your Microsoft Windows Store.
-
-How to get your account token and account refresh token?
-
+## How to get your account token and account refresh token?
 
 1. Go to [DogeHouse](https://dogehouse.tv)
 2. Login to the "bot" account
@@ -36,56 +27,16 @@ DOGEHOUSE_TOKEN = "DOGEHOUSE TOKEN HERE"
 
 DOGEHOUSE_REFRESH_TOKEN = "DOGEHOUSE REFRESH TOKEN HERE"
 ```
-(if you're on mobile, just ask your friend to get the tokens for you, there is no other way right now)
 
 How to get all the modules in requirements.txt?
 
 1. Run `pip install -r requirements.txt`
 2. Wait, and after a few minutes or less, you should have every module downloaded
 
-How to run
-------------
-
-1. Run on PC
-- After doing everything in `What you need:` do this:
-- Open your command prompt, `cd` into the folder with the main.py file
-  - Run the bot with `python main.py`
-  - If no errors show up, you're good to go!
-
-2. Run on [replit](https://www.replit.com) [![Run on Repl.it](https://repl.it/badge/github/asxlvm/DogeBoss)](https://repl.it/github/asxlvm/DogeBoss)
-- After doing everything in `What you need:` do this:
-  - Press the "Run" button as replit will start the file with that
-  - If no errors show up, you're good to go!
+## Running on Repl.it 
+  - If you want 24/7 hosting of the bot on repl.it, change the variable `run_on_repl` to `True` in `main.py`.
   
-  - If you want 24/7 hosting of the bot on replit add this to the code:
-  ```py
-  from keep_alive import keep_alive
-  
-  # your code etc.
-  
-  keep_alive()
-  ```
-  - You also have to add a `keep_alive.py` file in the same directory as `main.py` with this code:
-  ```py
-  from flask import Flask
-  from threading import Thread
-
-  app = Flask('')
-
-  @app.route('/')
-  def home():
-      return "Hello. I am alive!"
-
-  def run():
-      app.run(host='0.0.0.0',port=8080)
-      print("Flask server running")
-
-  def keep_alive():
-      t = Thread(target=run)
-      t.start()
-      print("Keep Alive file initiated")
-  ```
-  - After adding all of this code, go to [Uptime Robot](https://uptimerobot.com), register an account if you don't have one already and then do the following:
+  - To monitor your bot's uptime, go to [Uptime Robot](https://uptimerobot.com), register an account if you don't have one already and then do the following:
     - Create a new monitor with these parameters:
       - Monitor Type: HTTP(s)
       - Friendly Name: `Of your own choice, doesn't matter`
@@ -93,10 +44,8 @@ How to run
         - Start your script on replit, go to "Web", copy the URL at the top and paste it in the field
       - Click on "Create Monitor" and confirm by clicking "! Create Monitor (with no alert contact selected)"
 
-Commands
+Commands (this list does not contain all of them!)
 --------------------
-
-API Commands:
 
 Command                                 |  Description
 -------------------------------------|------------------------------------------------------------------------------------
@@ -134,17 +83,14 @@ Awesome people            |  Why they deserve credit
 [DogeHouse](https://dogehouse.tv)   |  The DogeHouse dev community for being really helpful, kind and supportive <3
 [dogehouse.py](https://github.com/Arthurdw/dogehouse.py)  | Arthur for making this great API wrapper, I couldn't make this bot without it obviously!
 [BenBot](https://github.com/dragonismcode/benbot)  | As I grabbed a little piece of code from them and "Pythoned" it :D
-[OEIS](https://github.com/sidneycadot/oeis/blob/master/README.md)  | I took their README.md and just modified it ;)
 
 TODO:
 --------------
 
-1. d!joke & d!dadjoke (will be done today)
-2. d!tictactoe (i have that done but i need to wait till \n new lines work)
-3. Economy (will be "done" this week maybe)
+1. d!joke & d!dadjoke
+2. d!tictactoe (I have that done but I need to wait till \n new lines work)
+3. Economy
 4. Complex `d!fight` command with `wait_for` events etc.
-5. Adding `Nome` values to commands so they're used easily and can return errors etc.
+5. Adding `None` values to commands so they're used easily and can return errors etc.
 
 Thanks to everyone!
-
-Made by Asylum
