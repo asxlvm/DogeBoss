@@ -60,7 +60,6 @@ class Client(DogeClient):
         with open("botinfo.json", "w") as f:
             json.dump(botinfogotten, f)
 
-
     @command
     async def setstar(self, ctx: Message):
         """Sets a message to be 'starred'. The current starred message can be accessed using the 'starred' command."""
@@ -122,136 +121,140 @@ class Client(DogeClient):
     @command
     async def battle(self, ctx: Context, *, user: BaseUser):
         """Starts a battle with the user you mentioned :hyperHammer:"""
-        current_hp_auth = 100
+        currenthpauth = 100
         moves = 0
-        current_hp_user = 100
-        players = []
-        if players != [] or current_hp_user != 100 or current_hp_auth != 100 or moves != 0:
-            return await self.send(f"{ctx.author.mention} a game is going on right now, you may not start another one.", whisper=[ctx.author.id])
-        if user == None:
-            return await self.send(message=f"{ctx.author.mention} Missing Required Argument - Usage: {self.prefix}battle <user> • Example: {self.prefix}fight @hudson", whisper=[ctx.author.id])
-        if user.id == ctx.author.id:
-            return await self.send(message=f"{ctx.author.mention} Bad Argument (You cannot battle yourself) - Usage: {self.prefix}battle <user> • Example: {self.prefix}fight @hudson", whisper=[ctx.author.id])
-        else:
+         currenthpuser = 100
+          players = []
+           if players != [] or currenthpuser != 100 or currenthpauth != 100 or moves != 0:
+                return await self.send(f"{ctx.author.mention} a game is going on right now, you may not start another one.", whisper=[ctx.author.id])
+            if user == None:
+                return await self.send(message=f"{ctx.author.mention} Missing Required Argument - Usage: d!battle <user> • Example: d!fight @hudson", whisper=[ctx.author.id])
+            if user.id == ctx.author.id:
+                return await self.send(message=f"{ctx.author.mention} Bad Argument (You cannot battle yourself) - Usage: d!battle <user> • Example: d!fight @hudson", whisper=[ctx.author.id])
+            else:
+                try:
+                    users = await self.get_settings_data()
+                    fightDecline = users[str(user.id)]["autoRejectFights"]
+                    if fightDecline == True:
+                        await self.send(f"{ctx.author.mention} you can't fight that user as he has enabled autoRejectFights.", whisper=[ctx.author.id])
+                        return False
+                except Exception as e:
+                    return print(e)
+                await self.send(f"{user.mention} do you accept {ctx.author.mention} 's fight request? OPTIONS: Yes / No", whisper=[user.id])
+                adwaitfor = await self.wait_for('message', check=lambda message: message.author.id == user.id)
+                if adwaitfor.content.lower() == "yes":
+                    await asyncio.sleep(2)
+                    await self.send(f"{user.mention} has accepted the fight request, 3, 2, 1, FIGHT!", whisper=[ctx.author.id, user.id])
+                    await asyncio.sleep(2)
+                    True
+                elif adwaitfor.content.lower() == "no":
+                    await asyncio.sleep(2)
+                    await self.send(f"{user.mention} has declined the fight request.", whisper=[ctx.author.id])
+                    return False
+            print("true")
+            m_author_id = ctx.author.id
+            m_user_id = user.id
+            m_author_mention = ctx.author.mention
+            m_user_mention = user.mention
+            turn = random.choice([m_author_id, m_user_id])
+            players = [m_author_id, m_user_id]
+            print(m_author_id)
+            print(m_user_id)
+            print(turn)
+            print(players)
+            print(moves)
             try:
-                users = await self.get_settings_data()
-                fightDecline = users[str(user.id)]["autoRejectFights"]
-                if fightDecline == True:
-                    await self.send(f"{ctx.author.mention} you can't fight that user as they have enabled Auto Reject Fights.", whisper=[ctx.author.id])
-                    return False
-            except Exception as e:
-                return print(e)
+                while True:
+                    if turn == m_author_id:
+                        currentturnid = m_author_id
+                        currentturnmention = m_author_mention
+                        currentturnhp = currenthpauth
+                        notturnid = m_user_id
+                        notturnmention = m_user_mention
+                        notturnhp = currenthpuser
+                    else:
+                        currentturnid = m_user_id
+                        currentturnmention = m_user_mention
+                        currentturnhp = currenthpuser
+                        notturnid = m_author_id
+                        notturnmention = m_author_mention
+                        notturnhp = currenthpauth
+                    print(currentturnmention)
+                    print(notturnmention)
+                    await asyncio.sleep(2)
+                    currentturnlist = [currentturnid]
+                    if currenthpauth <= 0 or currenthpuser <= 0:
+                        if currenthpauth > currenthpuser:
+                            await self.send(f"{m_author_mention} has won against {m_user_mention} in {moves} moves! His remaining HP was {currenthpauth} HP.")
+                            players = []
+                            moves = 0
+                            currenthpuser = 100
+                            currenthpauth = 100
+                            return False
+                        elif currenthpuser > currenthpauth:
+                            await self.send(f"{m_user_mention} has won against {m_author_mention} in {moves} moves! His remaining HP was {currenthpuser} HP.")
+                            players = []
+                            moves = 0
+                            currenthpuser = 100
+                            currenthpauth = 100
+                            return False
+                    await self.send(f"{currentturnmention}, what will you do now? • OPTIONS: Fight, Defense, Surrender • Your HP: {currentturnhp} HP, Your opponent's HP: {notturnhp} HP", whisper=currentturnlist)
+                    msg = await self.wait_for(event='message', check=lambda message: message.author.id == currentturnid, timeout=30)
 
-            await self.send(f"{user.mention} do you accept {ctx.author.mention} 's fight request? OPTIONS: Yes / No", whisper=[user.id])
-            wait_for_choice = await self.wait_for('message', check=lambda message: message.author.id == user.id)
+                    msgcont = msg.content.lower()
+                    if msgcont == 'fight':
+                        damage = random.randint(1, 35)
+                        if damage == 35:
+                            damage = random.randint(35, 75)
+                            dmgtext = f"{currentturnmention} made a critical hit of {damage} HP! :Pog:"
+                        else:
+                            dmgtext = f"{currentturnmention} chose violence. Damage of {damage} HP was given to {notturnmention}!"
+                        notturnhp = notturnhp - damage
+                        await self.send(message=dmgtext, whisper=players)
+                        moves += 1
+                        if turn == m_author_id:
+                            currenthpauth = currentturnhp
+                            currenthpuser = notturnhp
+                            turn = m_user_id
+                            True
+                        else:
+                            currenthpuser = currentturnhp
+                            currenthpauth = notturnhp
+                            turn = m_author_id
+                            True
 
-            if wait_for_choice.content.lower() == "yes" or wait_for_choice.content.lower() == "y":
-                await self.send(f"{user.mention} has accepted the fight request, 3, 2, 1, FIGHT! :crossed_swords:", whisper=[ctx.author.id, user.id])
-                await asyncio.sleep(3)
-                return True
-            elif wait_for_choice.content.lower() == "no" or wait_for_choice.content.lower() == "n":
-                await asyncio.sleep(1)
-                await self.send(f"{user.mention} has declined the fight request.", whisper=[ctx.author.id])
+                    elif msgcont == 'defense':
+                        healedhp = random.randint(5, 20)
+                        currentturnhp += healedhp
+                        if currentturnhp >= 100:
+                            currentturnhp = 100
+                        deftext = f"{currentturnmention} healed himself for {healedhp} HP!"
+                        await self.send(message=deftext, whisper=players)
+                        if turn == m_author_id:
+                            currenthpauth = currentturnhp
+                            currenthpuser = notturnhp
+                            turn = m_user_id
+                            True
+                        else:
+                            currenthpuser = currentturnhp
+                            currenthpauth = notturnhp
+                            turn = m_author_id
+                            True
+                    elif msgcont == 'surrender':
+                        await self.send(message=f"{currentturnmention} surrendered S :OMEGALUL:  BAD", whisper=players)
+                        moves = 0
+                        players = []
+                        currenthpauth = 100
+                        currenthpuser = 100
+                        return False
+
+            except asyncio.TimeoutError:
+                await self.send(f"{currentturnmention} did not respond in 30 seconds, fight ended.", whisper=players)
+                players = []
+                currenthpauth = 100
+                currenthpuser = 100
+                moves = 0
                 return False
-        m_author_id = ctx.author.id
-        m_user_id = user.id
-        m_author_mention = ctx.author.mention
-        m_user_mention = user.mention
-        turn = random.choice([m_author_id, m_user_id])
-        players = [m_author_id, m_user_id]
-
-        try:
-            while True:
-                if turn == m_author_id:
-                    currentturnid = m_author_id
-                    currentturnmention = m_author_mention
-                    currentturnhp = current_hp_auth
-                    notturnid = m_user_id
-                    notturnmention = m_user_mention
-                    notturnhp = current_hp_user
-                else:
-                    currentturnid = m_user_id
-                    currentturnmention = m_user_mention
-                    currentturnhp = current_hp_user
-                    notturnid = m_author_id
-                    notturnmention = m_author_mention
-                    notturnhp = current_hp_auth
-                print(currentturnmention)
-                print(notturnmention)
-                await asyncio.sleep(1)
-                currentturnlist = [currentturnid]
-                if current_hp_auth <= 0 or current_hp_user <= 0:
-                    if current_hp_auth > current_hp_user:
-                        await self.send(f"{m_author_mention} has won against {m_user_mention} in {moves} moves! His remaining HP was {current_hp_auth} HP.")
-                        players = []
-                        moves = 0
-                        current_hp_user = 100
-                        current_hp_auth = 100
-                        return False
-                    elif current_hp_user > current_hp_auth:
-                        await self.send(f"{m_user_mention} has won against {m_author_mention} in {moves} moves! His remaining HP was {current_hp_user} HP.")
-                        players = []
-                        moves = 0
-                        current_hp_user = 100
-                        current_hp_auth = 100
-                        return False
-                await self.send(f"{currentturnmention}, what will you do now? • OPTIONS: Fight, Defense, Surrender • Your HP: {currentturnhp} HP, Your opponent's HP: {notturnhp} HP", whisper=currentturnlist)
-                msg = await self.wait_for(event='message', check=lambda message: message.author.id == currentturnid, timeout=30)
-
-                msgcont = msg.content.lower()
-                if msgcont == 'fight':
-                    damage = random.randint(1, 35)
-                    if damage == 35:
-                        damage = random.randint(35, 75)
-                        dmgtext = f"{currentturnmention} made a critical hit of {damage} HP! :Pog:"
-                    else:
-                        dmgtext = f"{currentturnmention} chose violence. Damage of {damage} HP was given to {notturnmention}!"
-                    notturnhp = notturnhp - damage
-                    await self.send(message=dmgtext, whisper=players)
-                    moves += 1
-                    if turn == m_author_id:
-                        current_hp_auth = currentturnhp
-                        current_hp_user = notturnhp
-                        turn = m_user_id
-                        True
-                    else:
-                        current_hp_user = currentturnhp
-                        current_hp_auth = notturnhp
-                        turn = m_author_id
-                        True
-
-                elif msgcont == 'defense':
-                    healedhp = random.randint(5, 20)
-                    currentturnhp += healedhp
-                    if currentturnhp >= 100:
-                        currentturnhp = 100
-                    deftext = f"{currentturnmention} healed himself for {healedhp} HP!"
-                    await self.send(message=deftext, whisper=players)
-                    if turn == m_author_id:
-                        current_hp_auth = currentturnhp
-                        current_hp_user = notturnhp
-                        turn = m_user_id
-                        True
-                    else:
-                        current_hp_user = currentturnhp
-                        current_hp_auth = notturnhp
-                        turn = m_author_id
-                        True
-                elif msgcont == 'surrender':
-                    await self.send(message=f"{currentturnmention} surrendered S :OMEGALUL:  BAD", whisper=players)
-                    moves = 0
-                    players = []
-                    current_hp_auth = 100
-                    current_hp_user = 100
-                    return False
-
-        except asyncio.TimeoutError:
-            await self.send(f"{currentturnmention} did not respond in 30 seconds, fight ended.", whisper=players)
-            players = []
-            current_hp_auth = 100
-            current_hp_user = 100
-            moves = 0
-            return False
 
     @command
     async def waitfor(self, ctx: Message):
@@ -571,7 +574,6 @@ class Client(DogeClient):
         stats = [users[str(userid)]["rancmd"], users[str(userid)]["xp"]]
         return stats
 
-
     @command
     async def whoami(self, ctx: Message):
         """Gets info about yourself"""
@@ -581,13 +583,14 @@ class Client(DogeClient):
     async def whereami(self, ctx: Message):
         """Gets info about the room you're in"""
         await self.send(f"Name: {self.room.name} • Description: {self.room.description} • ID: {self.room.id} • Member Count: {self.room.count} • Created at: {self.room.created_at} • Is Private?: {self.room.is_private}")
-    
+
     @command
     async def slots(self, ctx: Message):
         """Plays a slot machine :slot_machine:"""
         final = []
         for i in range(5):
-            a = random.choice([":redDogeHouse:", ":OrangeDogeHouse:", ":PurpleDogeHouse:", ":CyanDogeHouse:", ":CoolHouse:"])
+            a = random.choice([":redDogeHouse:", ":OrangeDogeHouse:",
+                               ":PurpleDogeHouse:", ":CyanDogeHouse:", ":CoolHouse:"])
             final.append(a)
 
         final_set = set(final)
@@ -604,7 +607,7 @@ class Client(DogeClient):
     @command
     async def crypto(self, ctx: Message, currency: str):
         """Returns stats for the specified cryptocurrency :CryptoDOGE:"""
-        
+
         # Get the current currency symbol name to get the right price for that currency
         curr_symbol = locale.localeconv()['int_curr_symbol'].lower()
 
@@ -616,7 +619,7 @@ class Client(DogeClient):
 
         name = rejson["name"]
         symbol = rejson["symbol"].upper()
-        price = locale.currency(rejson["current_price"]) # Format as currency
+        price = locale.currency(rejson["current_price"])  # Format as currency
         ranked = rejson["market_cap_rank"]
         twenty_high = rejson["high_24h"]
         twenty_low = rejson["low_24h"]
@@ -649,19 +652,22 @@ class Client(DogeClient):
     @command
     async def dog(self, ctx: Message):
         """Returns a random image of a dog :dog:"""
-        image_url = requests.get("https://api.thedogapi.com/v1/images/search", headers={"x-api-key": "d0558cf8-f941-42f7-8daa-6741a67c5a2e"}).json()[0]["url"]
+        image_url = requests.get("https://api.thedogapi.com/v1/images/search", headers={
+                                 "x-api-key": "d0558cf8-f941-42f7-8daa-6741a67c5a2e"}).json()[0]["url"]
         await self.send(image_url)
 
     @command
     async def cat(self, ctx: Message):
         """Returns a random image of a cat :cat:"""
-        image_url = requests.get("https://api.thecatapi.com/v1/images/search", headers={"x-api-key": "37b77c23-9000-46c8-b808-a224a26f2d2a"}).json()[0]["url"]
+        image_url = requests.get("https://api.thecatapi.com/v1/images/search", headers={
+                                 "x-api-key": "37b77c23-9000-46c8-b808-a224a26f2d2a"}).json()[0]["url"]
         await self.send(image_url)
 
     @command
     async def shibe(self, ctx: Message):
         """Returns a random image of a Shibe :dogeCool:"""
-        image_url = requests.get("https://shibe.online/api/shibes?count=1").json()[0]
+        image_url = requests.get(
+            "https://shibe.online/api/shibes?count=1").json()[0]
         await self.send(image_url)
 
     @command
@@ -674,7 +680,8 @@ class Client(DogeClient):
     @command
     async def joke(self, ctx: Message):
         """Tells a joke"""
-        req = requests.get("https://v2.jokeapi.dev/joke/Any?type=single").json()["joke"]
+        req = requests.get(
+            "https://v2.jokeapi.dev/joke/Any?type=single").json()["joke"]
         line = " ".join(req.splitlines())
         await self.send(line)
 
@@ -700,7 +707,7 @@ class Client(DogeClient):
 
     @command
     async def roll(self, ctx: Message, *, sides: int):
-        """Rolls a dice :game_die:"""
+        """Rolls a dice"""
         await self.send("You rolled ... " + str(random.randint(1, sides)))
 
     @command
@@ -712,7 +719,8 @@ class Client(DogeClient):
 
     @command
     async def funfact(self, ctx: Message):
-        res = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
+        res = requests.get(
+            "https://uselessfacts.jsph.pl/random.json?language=en")
         funfactt = res.json()
         textfun = funfactt["text"]
         whisperto = [ctx.author.id]
@@ -909,7 +917,8 @@ class Client(DogeClient):
                 # Get argument names and surround them with <>
                 varnames = inspect.getfullargspec(function).args
                 varnames.remove("self")
-                varnames_formatted = ' '.join('<' + item + '>' for item in varnames)
+                varnames_formatted = ' '.join(
+                    '<' + item + '>' for item in varnames)
 
                 helpstring = f"{self.prefix}{function.__name__} {varnames_formatted}  -  {function.__doc__}"
                 helparray.append(helpstring)
