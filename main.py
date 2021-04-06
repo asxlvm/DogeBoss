@@ -175,6 +175,13 @@ class Client(DogeClient):
         await self.send(line)
 
     @command
+    async def joke(self, ctx: Message):
+        """Tells a joke"""
+        req = requests.get("https://v2.jokeapi.dev/joke/Any?type=single").json()["joke"]
+        line = " ".join(req.splitlines())
+        await self.send(line)
+
+    @command
     async def insult(self, ctx: Message, *, other_user: User = ctx.author):
         """Insults the user you mentioned"""
         req = requests.get("https://insult.mattbas.org/api/insult")
