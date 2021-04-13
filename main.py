@@ -13,12 +13,14 @@ import datetime, time
 from datetime import datetime
 import asyncio
 import re
+from inspect import getdoc
 import inspect
 import sys
 import psutil
 import subprocess
 import json
 from covid import Covid
+from bs4 import BeautifulSoup
 from keep_alive import keep_alive
 
 DOGETOKEN = os.getenv('DOGEHOUSE_TOKEN')
@@ -36,29 +38,32 @@ class Client(DogeClient):
 			print("Keep Alive initiated")
 			print(f"Successfully connected as {self.user}")
 				#await self.create_room("testingbruh")
-			await self.join_room("1fbb7d1e-d3b1-43ae-9854-06cd9231fe50")
+			await self.join_room("3daf5a80-5b0a-4dde-9527-9db1f7f13755")
 			#await self.join_room("49f98ecb-fd8c-4013-a642-14463f6da784")
 		except Exception as e:
 			print(e)
 	
+	@command
+	async def help(self, ctx: Context, *, cmd: str = None):
+		"""
+		The main help menu! Arguments: cmd = an optional argument which specifies a command, so that you can see the command description.
+		"""
+		if cmd is None:
+			sentmsg = f"Hello, my prefix is `{self.prefix}` , to see info about a specific command, type {self.prefix}help <command name> , my commands are: " + " • ".join(self.commands.keys())
+		else:
+			cmd = cmd.lower()
+			try:
+				sentmsg = f"`{cmd}` : {getdoc(self.commands[cmd][0])}"
+			except:
+				sentmsg = f"Could not find `{cmd}` ! Use `{self.prefix}help` to see all commands!"
+		await self.send(sentmsg, whisper=[ctx.author.id])
+
+
+
 	async def bot_info_get(self):
 		with open("botinfo.json", "r") as f:
 			botinfo = json.load(f)
 		return botinfo
-	
-	@command
-	async def getusercache(self, ctx: Context, username):
-		try:
-			user = await self.get_user(username)
-			uid = user.id
-			uname = user.username
-			await self.send(f"{uid} • {uname}", whisper=[ctx.author.id])
-		except Exception as e:
-			await self.send(e, whisper=[ctx.author.id])
-	
-	@command
-	async def botinfo(self, ctx: Context):
-		await self.send(dogehouse.__version__)
 	
 	async def convertuser(self, base_user_id):
 		try:
@@ -70,9 +75,12 @@ class Client(DogeClient):
 					continue
 		except:
 			pass
-	
+
+
+
 	@command
 	async def altcheck(self, ctx: Context):
+		"""Checks for any alternative accounts in the room | Currently doesn't work"""
 		authormsg = ctx.author
 		#authormsg = await self.convertuser(ctx.author.id)
 		if authormsg.id == ownerid:
@@ -125,6 +133,7 @@ class Client(DogeClient):
 
 	@command
 	async def execlang(self, ctx: Context):
+		f"""Shows all the available languages for `{self.prefix}execute`"""
 		requrl = "https://emkc.org/api/v1/piston/versions"
 		req = requests.get(requrl)
 		names = []
@@ -142,6 +151,7 @@ class Client(DogeClient):
 
 	@command
 	async def execute(self, ctx: Context, lang, *, src):
+		f"""Executes a script with any of the languages listed in `{self.prefix}execlang` | `/new` is used for new lines, `/ind` is used for an indent | Arguments: language = The chosen language to run the script with • script = The specified code to run"""
 		requrl = "https://emkc.org/api/v1/piston/execute"
 		srce = src.replace("/ind ", "  ")
 		reqdata = {
@@ -156,12 +166,6 @@ class Client(DogeClient):
 				#return await self.send(e, whisper=[ctx.author.id])
 		output = reqjson['output']
 		await self.send(output, whisper=[ctx.author.id])
-	
-	@command
-	async def testingkek(self, ctx: Context):
-		datetime1 = "2021-01-23T16:22:26Z"
-		delta = datetime(datetime1) - datetime.utcnow()
-		await self.send(delta, whisper=[ctx.author.id])
 
 	@command
 	async def sysinfo(self, ctx: Context):
@@ -179,19 +183,19 @@ class Client(DogeClient):
 	
 	@command
 	async def dog(self, ctx: Message):
-		"""Returns a random image of a dog :dog:"""
+		"""Returns a random image of a dog"""
 		image_url = requests.get("https://api.thedogapi.com/v1/images/search", headers={"x-api-key": "d0558cf8-f941-42f7-8daa-6741a67c5a2e"}).json()[0]["url"]
 		await self.send(image_url, whisper=[ctx.author.id])
 	
 	@command
 	async def cat(self, ctx: Message):
-		"""Returns a random image of a cat :cat:"""
+		"""Returns a random image of a cat"""
 		image_url = requests.get("https://api.thecatapi.com/v1/images/search", headers={"x-api-key": "37b77c23-9000-46c8-b808-a224a26f2d2a"}).json()[0]["url"]
 		await self.send(image_url, whisper=[ctx.author.id])
 	
 	@command
 	async def shibe(self, ctx: Message):
-		"""Returns a random image of a Shibe :dogeCool:"""
+		"""Returns a random image of a Shibe"""
 		image_url = requests.get("https://shibe.online/api/shibes?count=1").json()[0]
 		await self.send(image_url, whisper=[ctx.author.id])
 	
@@ -212,8 +216,8 @@ class Client(DogeClient):
 	@command
 	async def insult(self, ctx: Message, *, other_user: User = None):
 		"""Insults the user you mentioned"""
-		if user == None:
-			user = ctx.author.mention
+		if other_user == None:
+			other_user = ctx.author.mention
 		req = requests.get("https://insult.mattbas.org/api/insult")
 		html = req.content.decode("utf-8")
 		await self.send(f"{other_user}, {req.content}.")
@@ -221,8 +225,8 @@ class Client(DogeClient):
 	@command
 	async def compliment(self, ctx: Message, *, other_user: User = None):
 		"""Compliments the user you mentioned"""
-		if user == None:
-			ctx.author.mention
+		if other_user == None:
+			other_user = ctx.author.mention
 		req = requests.get("http://www.madsci.org/cgi-bin/lynn/jardin/SCG")
 		html = req.content
 		soup = BeautifulSoup(html, "html.parser")
@@ -235,7 +239,7 @@ class Client(DogeClient):
 	
 	@command
 	async def roll(self, ctx: Message, *, sides: int):
-		"""Rolls a dice :game_die:"""
+		"""Rolls a dice"""
 		await self.send("You rolled ... " + str(random.randint(1, sides)), whisper=[ctx.author.id])
 	
 	@command
@@ -264,15 +268,13 @@ class Client(DogeClient):
 		#await self.join_room("755293bc-3a54-415e-99a0-bb1d7ef07bbe")
 		#await self.join_room("aa2e15e1-b1da-42cd-a802-6789d7ddf6ec")
 
-		#await self.send(f"Hey! My name is DogeBoss! I'm a multi-purpose chatbot, to see my features, type:ㅤㅤ d!help")
-	@command
-	async def testifbroken(self, ctx: Message):
-		await self.send(":Pog:")
+		#await self.send(f"Hey! My name is DogeBoss! I'm a multi-purpose chatbot, to see my features, type:ㅤㅤ d!help"
 
 # Starboard command
 
 	@command
 	async def setstar(self, ctx: Message):
+		f"""Sets the latest message as starred, you can access starred messages with `{self.prefix}starred`"""
 		global msg #making the variables global so we can access them from any command
 		global msgauthor
 		global starred
@@ -283,6 +285,7 @@ class Client(DogeClient):
 
 	@command
 	async def starred(self, ctx: Message):
+		"""Shows you the starred message"""
 		global starred
 		global starredauthor
 		await self.send(
@@ -290,6 +293,7 @@ class Client(DogeClient):
 
 	@command
 	async def owoify(self, ctx: Message, *, owome: str = None):
+		"""Owoifies your message UwU"""
 		if owome == None:
 			return await self.send(
 			    f"{ctx.author.mention} Missing Required Argument - Usage: d!owoify <message> • Example: d!owoify dont hurt me!"
@@ -323,24 +327,17 @@ class Client(DogeClient):
 					owomee = owome.replace(i, f"y{i}")
 
 			await self.send(f"{owomee}ㅤㅤ• {ctx.author.mention}")
-
-	@command
-	async def defvartest(self, ctx: Message, *, defvar=None):
-		if defvar == None:
-			print(defvar)
-			return await self.send("defvar!")
-		else:
-			print(defvar)
-			return await self.send(f"not a defvar: {defvar}")
-
+	
 	@command
 	async def github(self, ctx: Message):
+		"""Sends you the DogeBoss repository"""
 		await self.send(
 		    f"{ctx.author.mention} ㅤㅤ I'm open-source! You can look at my source code here!ㅤ https://github.com/asxlvm/DogeBoss :GitHub:"
 		)
 	
 	@command
-	async def testbattle(self, ctx: Context, *, user: BaseUser):
+	async def battle(self, ctx: Context, *, user: BaseUser):
+		"""Makes you fight with the specified user | Arguments: user = The user you will be fighting against"""
 		print("here")
 		currenthpauth = 100
 		moves = 0
@@ -490,31 +487,6 @@ class Client(DogeClient):
 
 # Battleeeee ;O
 
-	@command
-	async def waitfor(self, ctx: Message):
-		await self.send("will this work")
-		waitedmsg = await self.wait_for(
-		    event='message',
-		    timeout=10,
-		    check=lambda message: message.author.id == ctx.author.id)
-		await self.send(f"{waitedmsg.content}")
-
-	@command
-	async def usertestt(self, ctx: Message, *, user: str = None):
-		if user and user.startswith('@'):
-			user = user[1::]
-		try:
-			if user is None:
-				user: Union[User, UserPreview] = ctx.author
-			for usr in self.room.users:
-				if str(usr) == user or isinstance(
-				    usr, User) and usr.displayname == user[0]:
-					pass
-
-		except IndexError:
-			return await self.send(f"User '{user}' not found!")
-		await self.send(
-		    f"{user.mention if isinstance(user, User) else user.displayname}")
 
 	def owner_check(self, authorid):
 		if authorid == ownerid:
@@ -524,6 +496,7 @@ class Client(DogeClient):
 	
 	@command
 	async def evaluate(self, ctx: Context, *, evalThis):
+		"""Owner-only command for executing code"""
 		ownercheck = self.owner_check(ctx.author.id)
 		if ownercheck == False:
 			return await self.send('Owner-Only Command', whisper=[ctx.author.id])
@@ -535,6 +508,7 @@ class Client(DogeClient):
 	
 	@command
 	async def shell(self, ctx: Context, *, shellCmd):
+		"""Owner-only command for executing commands to the Linux shell"""
 		ownercheck = self.owner_check(ctx.author.id)
 		if ownercheck == False:
 			return await self.send('Owner-Only Command', whisper=[ctx.author.id])
@@ -542,23 +516,11 @@ class Client(DogeClient):
 		stdout_value = proc.stdout.read() + proc.stderr.read()
 		realval = str(stdout_value).replace("\n", " ")
 		await self.send(f"{realval}", whisper=[ctx.author.id])
-	
-	@command
-	async def checking(self, ctx: Message):
-		try:
-			ownercheck = self.owner_check(ctx.author.id)
-			if ownercheck == True:
-				return await self.send("yes you are owner ok yes")
-			elif ownercheck == False:
-				return await self.send("no you are not owner no")
-			else:
-				return await self.send("yes ok you bugged me")
-		except Exception as e:
-			return await self.send(f"Error: {e}")
 
 
 	@command
 	async def reboot(self, ctx: Message):
+		"""Owner-only command for rebooting the bot"""
 		if ctx.author.id == ownerid:
 			owner_check = True
 		else:
@@ -579,19 +541,6 @@ class Client(DogeClient):
 			return await self.send(
 			    f"{ctx.author.mention} You are not the owner of the bot so you may not reboot it!"
 			)
-
-	@command
-	async def testuser(self, ctx: Message, *, user: str = None):
-		if user and user.startswith('@'):
-			user = user[1::]
-		try:
-			user: Union[User, UserPreview] = ctx.author if user is None else \
-              [usr for usr in self.room.users if \
-                str(usr) == user or (isinstance(usr, User) and usr.displayname == user)][0]
-		except IndexError:
-			return await self.send(f"User '{user}' not found!")
-
-		await self.send(f"{user.displayname} • ID: {user.id}")
 
 	async def open_settings(self, userid, username):
 		users = await self.get_settings_data()
@@ -622,6 +571,7 @@ class Client(DogeClient):
 		return users
 	@command
 	async def settings(self, ctx: Context):
+		"""Command for seeing your settings"""
 		try:
 			await self.open_settings(ctx.author.id, ctx.author.username)
 			userid = ctx.author.id
@@ -639,6 +589,7 @@ class Client(DogeClient):
 	
 	@command
 	async def change(self, ctx: Context):
+		"""Command for changing your settings"""
 		await self.send(f"If you wish to see your settings, go on our site: https://asxlvm.github.io/#/settings • If you already saw your settings and wish to change them. What do you want to change?", whisper=[ctx.author.id])
 		await asyncio.sleep(2)
 		await self.send(f"Options: allowMentions [bool] • autoRejectFights [bool] • passiveMode [bool] • whisperEconomy [bool]• onJoinMsg [bool] • allowUserInteraction [bool] | [bool] = True / False", whisper=[ctx.author.id])
@@ -777,6 +728,7 @@ class Client(DogeClient):
 
 	@command
 	async def stats(self, ctx: Message):
+		"""Command to see your statistics"""
 		await self.open_account(ctx.author.id, ctx.author.username)
 		userid = ctx.author.id
 		users = await self.get_stats_data()
@@ -840,6 +792,7 @@ class Client(DogeClient):
 	
 	@command
 	async def leaderboard(self, ctx: Context, category: str = "rancmd"):
+		"""You're able to see the leaderboards with this command | Arguments: category = (Optional) This changes the category of the leaderboards"""
 		users = await self.get_stats_data()
 		leader_board = {}
 		total = []
@@ -886,26 +839,17 @@ class Client(DogeClient):
 	####
 
 	@command
-	async def whoami(self, ctx: Message):
-		await self.send(
-		    f"Username: {ctx.author.mention}  •  Display Name: {ctx.author.displayname}  •  ID: {ctx.author.id}"
-		)
-
-	@command
-	async def whereami(self, ctx: Message):
+	async def roominfo(self, ctx: Message):
+		"""You can see the info about the room you're in"""
 		await self.send(
 		    f"Name: {self.room.name} • Description: {self.room.description} • ID: {self.room.id} • Member Count: {self.room.count} • Created at: {self.room.created_at} • Is Private?: {self.room.is_private}"
 		)
 
-	@command
-	async def testcov(self, ctx: Message, *, country):
-		cases = Covid().get_status_by_country_name(country.lower())
-		await self.send(f"{cases}")
 
 	@command
 	#async def slots(self, ctx: Message, bet: int):
 	async def slots(self, ctx: Message):
-
+		"""Spin a slot machine with this command, gamble it out."""
 		final = []
 		for i in range(5):
 			a = random.choice([
@@ -932,6 +876,7 @@ class Client(DogeClient):
 
 	@command
 	async def crypto(self, ctx: Message, crypc: str = None):
+		"""You can see statistics about a cryptocurrency with this command | Arguments: currency = The currency the stats will be shown for"""
 		if crypc == None:
 			return await self.send(
 			    f"{ctx.author.mention} Missing Required Argument - Usage: d!crypto <currency> • Example: d!crypto bitcoin"
@@ -981,6 +926,7 @@ class Client(DogeClient):
 
 	@command
 	async def funfact(self, ctx: Message):
+		"""Sends you a random funfact"""
 		res = requests.get(
 		    "https://uselessfacts.jsph.pl/random.json?language=en")
 		funfactt = res.json()
@@ -990,6 +936,7 @@ class Client(DogeClient):
 
 	@command
 	async def define(self, ctx: Message, *, term: str = None):
+		"""Searches for the specified term on Urban Dictionary | Arguments: term = The term the bot will search for"""
 		if term == None:
 			return await self.send(
 			    f"{ctx.author.mention} Missing Required Argument - Usage: d!define <term> • Example: d!define lmao"
@@ -1032,6 +979,7 @@ class Client(DogeClient):
 
 	@command
 	async def covid(self, ctx: Message, *, counry=None):
+		"""You can see COVID statistics of a specified country with this command | Arguments: country = The country the stats will be shown for"""
 
 		#countries = Covid().list_countries()
 		country = string.capwords(counry)
@@ -1062,7 +1010,7 @@ class Client(DogeClient):
 		region = cases["country"]
 		confirmed = cases["confirmed"]
 		active = cases["active"]
-		deaths = cases
+		deaths = cases["deaths"]
 		recovered = cases["recovered"]
 		whisperto = [ctx.author.id]
 		await self.send(
@@ -1076,24 +1024,6 @@ class Client(DogeClient):
 		botinfogotten["botinfo"]["botroomdescription"] = f"{self.room.description}"
 		with open("botinfo.json", "w") as f:
 			json.dump(botinfogotten, f)
-	
-	@command
-	async def testingdtm(self, ctx: Context):
-		user = ctx.author
-		gthubid = "81298611"
-		requrl = "https://api.github.com/user/" + gthubid
-		req = requests.get(requrl)
-		reqjson = req.json()
-		createdate = reqjson['created_at']
-		rntime = datetime.now()
-		d = datetime.fromisoformat(createdate[:-1])
-		d.strftime('%Y-%m-%d %H:%M:%S.%f')
-		timedeltuh = rntime - d
-	
-	@command
-	async def amiratelimited(self, ctx: Context):
-		req = requests.get("https://api.github.com/user/81298611")
-		await self.send(req.json(), whisper=[ctx.author.id])
 	
 	async def returnavinfo(self, usertoget):
 		try:
@@ -1121,6 +1051,7 @@ class Client(DogeClient):
 	
 	@command
 	async def socialinfo(self, ctx: Context, user: User = None):
+		"""The bot will try to grab info of their socials through their avatar | Arguments: user = The user the bot will search for"""
 		try:
 			if user == None:
 				return await self.send("didnt tag u dum")
@@ -1150,25 +1081,11 @@ class Client(DogeClient):
 			print(e)
 	
 	@command
-	async def foruser(self, ctx: Context):
-		for user in self.room.users:
-			if user.id == ctx.author.id:
-				print("yes pog!")
-				print(user)
-				break
-			else:
-				print("no")
-	
-	@command
 	async def userinfo(self, ctx: Context, user: User = None):
+		"""Command to see user info about a specified user if wanted | Arguments: user = (optional) The user the bot will get the info from"""
 		if user == None:
 			user = ctx.author
-		for userRoom in self.room.users:
-			if userRoom.id == user.id:
-				user = userRoom
-				break
-			else:
-				continue
+		user = self.get_user(user.id)
 		username = user.username
 		uid = user.id
 		displayname = user.displayname
@@ -1199,145 +1116,8 @@ class Client(DogeClient):
 
 
 
-	player1 = ""
-	player2 = ""
-	turn = ""
-	gameOver = True
-	board = []
-	winningConditions = [
-	  [0, 1, 2],
-	  [3, 4, 5],
-	  [6, 7, 8],
-	  [0, 3, 6],
-	  [1, 4, 7],
-	  [2, 5, 8],
-	  [0, 4, 8],
-	  [2, 4, 6]
-	]
-	@command
-	async def tictactoe(self, ctx: Context, p1: User, p2: User):
-		global count
-		global player1
-		global player2
-		global turn
-		global gameOver
-		if p1==p2:
-			count = 0
-			player1 = ""
-			player2 = ""
-			turn = ""
-			gameOver = True
-			return
-		else:
-			gameOver = False
-		
-		if gameOver:
-			global board
-			board = [":[]", ":[]", "`:[]`",
-			":[]", ":[]", "`:[]`",
-			":[]", ":[]", "`:[]`"]
-			turn = ""
-			gameOver = False
-			count = 0
-			player1 = p1
-			player2 = p2
-			# print the board
-			line = ""
-			for x in range(len(board)):
-				if x == 2 or x == 5 or x == 8:
-					line += " " + board[x]
-					lines = [line]
-					line = ""
-				else:
-					line += " " + board[x]
-			linesend = "".join(lines)
-			await self.send(linesend)
-			lines = []
-			linesend = ""
-			# determine who goes first
-			num = random.randint(1, 2)
-			if num == 1:
-				turn = player1
-				await self.send(f"{player1.username}'s turn.")
-			elif num == 2:
-				turn = player2
-				await self.send(f"{player2.username}'s turn.")
-		else:
-			await self.send("gaem alrdy playing")
-	
-	@command
-	async def place(self, ctx: Context, pos: int):
-		global turn
-		global player1
-		global player2
-		global board
-		global count 
-		global gameOver
-		if not gameOver:
-			mark = ""
-			if turn == ctx.author:
-				if turn == player1:
-					mark = "`:X`"
-				elif turn == player2:
-					mark = "`:O`"
-				if 0 < pos < 10 and board[pos - 1] == "`:[]`" :
-					board[pos - 1] = mark
-					count += 1
-					# print the board
-					line = ""
-					for x in range(len(board)):
-						if x == 2 or x == 5 or x == 8:
-							line += " " + board[x]
-							lines = [line]
-							line = ""
-						else:
-							line += " " + board[x]
-					linesend = "".join(lines)
-					await self.send(linesend)
-					lines = []
-					line = ""
-					
-					checkWinner(winningConditions, mark)
-					print(count)
-					if gameOver == True:
-						await self.send(mark + " won")
-					elif count >= 9:
-						gameOver = True
-						await self.send("tie haha noobs!")
-						# switch turns
-					if turn == player1:
-						turn = player2
-					elif turn == player2:
-						turn = player1
-				else:
-					await self.send("noob number 1-9 and non-selected tile.")
-			else:
-				await self.send("its not ur turn")
-		else:
-			await self.send("start new gaem with d!tictactoe")
-	
-	def checkWinner(winningConditions, mark):
-		global gameOver
-		for condition in winningConditions:
-			if board[condition[0]] == mark and board[condition[1]] == mark and board[condition[2]] == mark:
-				gameOver = True
 	
 
-	@command
-	async def twitterinfo(self, ctx: Context, user: User):
-		avurl = user.avatar_url
-		
-		twid = avurl[37:].replace("/", " ")
-		twidd = twid.split()
-		twid = twidd[0]
-		print(twid)
-		print(avurl)
-		resurl = "https://api.twitter.com/1.1/users/show.json?user_id=" + twid
-		resheader = {"authorization": "Bearer AAAAAAAAAAAAAAAAAAAAAA%2BIOQEAAAAAL9KSEymYXRvSGDENffi%2F9C0Qz%2Bs%3D9R1TephupNhdShMAn55cMRyjIDaNSi5hde1o5YKxB7UDQpvOIO"}
-		
-		res = requests.get(resurl, headers=resheader)
-		resjson = res.json()
-		print(resjson)
 		
 	@event
 	async def on_user_join(self, user: User):
@@ -1378,6 +1158,7 @@ class Client(DogeClient):
 
 	@command
 	async def uptime(self, ctx: Message):
+		"""You can see the bot's uptime with this command"""
 		delta_uptime = datetime.utcnow() - launch_time
 		hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
 		minutes, seconds = divmod(remainder, 60)
@@ -1424,6 +1205,7 @@ class Client(DogeClient):
 
 	@command
 	async def math(self, ctx: Message, *, expression: str = None):
+		"""This command is able to calculate a mathematical expression | Arguments: expression = The math expression that will be calculated"""
 		if expression == None:
 			return await self.send(
 			    f"{ctx.author.mention} Missing Required Argument - Usage: d!math <math-problem> • Example: d!math 69+420*1337"
@@ -1465,6 +1247,7 @@ class Client(DogeClient):
 
 	@command
 	async def echo(self, ctx: Message, *, msage: str = None):
+		"""Repeats the said message | Arguments: message = The message that the bot will repeat"""
 		if msage == None:
 			return await self.send(
 			    f"{ctx.author.mention} Missing Required Argument - Usage: d!echo <message> • Example: d!echo wow cool. mush doge."
@@ -1487,12 +1270,10 @@ class Client(DogeClient):
 
 	@command
 	async def pp(self, ctx: Message, *, user: User = None):
+		"""Shows the user's pp length | Arguments: user = (optional) The user that will be used in this command"""
 		print(user)
 		if user == None:
-			user2 = ctx.author.mention
-			print(user)
-		else:
-			user2 = user.mention
+			user = ctx.author
 		pps = [
 		    "girl moment :SillyChamp:", "8D", "8=D", "8=D", "8==D", "8==D",
 		    "8===D", "8===D", "8====D", "8====D", "8=====D", "8=====D",
@@ -1502,10 +1283,11 @@ class Client(DogeClient):
 
 		pprnd = random.choice(pps)
 
-		await self.send(f"{user2}'s pp: ㅤㅤㅤ{pprnd}")
+		await self.send(f"{user.mention}'s pp: {pprnd}")
 
 	@command
 	async def fight(self, ctx: Message, *, u22: User = None):
+		"""Shows the result of a fight against the message author and the specified user | Arguments: user = The user that will be used in this command"""
 		if u22 == None:
 			return await self.send(
 			    f"{ctx.author.mention} Missing Required Argument - Usage: d!fight <user> • Example: d!fight @asylum"
@@ -1548,20 +1330,6 @@ class Client(DogeClient):
 		response = random.choice(responses)
 
 		await self.send(f'{response}')
-
-	@command
-	async def help(self, ctx: Message):
-		user = [ctx.author.id]
-		await self.send(
-		    message=
-		    "Hey, these are my commands right now! • d!echo <message>  -  Repeats what you said • d!pp <user>  -  Sends the tagged user's pp :gachiHYPER: • d!covid <country>  - Sends COVID stats for the specified country :coronaS: • d!define <term>  - Searches for the specified term on Urban Dictionary • d!funfact  - Returns a random fun fact • d!crypto <currency>  - Returns stats for the specified crypto :CryptoDOGE: • d!math <example>  -  Returns the results for a mathematical example :5Head: • d!slots  -  Slots command, economy will be implemented",
-		    whisper=user)
-		await asyncio.sleep(1.5)
-		await self.send(
-		    message=
-		    "d!fight <user>  -  You fight the user you mentioned :hyperHammer: • d!uptime  -  Shows for how long the bot has been online • d!setstar & d!starred  -  d!setstar Sets a message to be starred, a starred message can be accessed by typing d!starred unless it's overwritten by another starred message • d!github  -  Sends you the link to my source code! :GitHub:",
-		    whisper=user)
-		#whispers the help command to the user that executed it
 
 if __name__ == "__main__":
 	Client(DOGETOKEN, DOGEREFRESHTOKEN, prefix="d!",reconnect_voice=True).run()
